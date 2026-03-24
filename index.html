@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>vealechecker</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: #1a6fd4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .page {
+      display: none;
+      width: 100%;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .page.active { display: flex; }
+
+    /* Login */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .label-box { background: #111; border-radius: 10px; padding: 0.75rem 1rem; }
+    .label-box span { color: white; font-size: 15px; font-weight: 500; }
+    .name-input {
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 15px;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+    .name-input:focus { border-color: #1a6fd4; }
+    .name-input.error { border-color: red; }
+
+    /* Circle button */
+    .btn-wrap { display: flex; justify-content: center; margin-top: 0.5rem; }
+    .circle-btn {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #111;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .circle-btn.active { background: #1a6fd4; }
+    .circle-btn.active svg { stroke: white; }
+
+    /* Option buttons */
+    .option-wrap { display: flex; flex-direction: column; gap: 1.25rem; width: 100%; max-width: 400px; }
+    .row { display: flex; gap: 1rem; width: 100%; }
+    .option-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      color: #111;
+      transition: transform 0.15s;
+      border: none;
+      flex: 1;
+    }
+    .option-card:hover { transform: scale(1.03); }
+
+    /* Form */
+    .form-page { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 1rem; }
+    .form-label { color: white; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-input {
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      font-size: 15px;
+      outline: none;
+      width: 100%;
+      background: white;
+      resize: none;
+    }
+    .form-input.tall { height: 120px; }
+    .submit-wrap {
+      background: white;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* Ratings page */
+    .ratings-page { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 0.75rem; }
+    .ratings-title { color: #111; font-size: 15px; font-weight: 600; }
+    .ratings-box {
+      background: white;
+      border-radius: 16px;
+      padding: 1rem;
+      min-height: 300px;
+      overflow-y: auto;
+      max-height: 70vh;
+    }
+    .col-headers {
+      display: flex;
+      gap: 8px;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #eee;
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+    }
+    .col-headers .c1 { flex: 1; }
+    .col-headers .c2 { flex: 2; }
+    .col-headers .c3 { flex: 1.5; text-align: right; }
+    .rating-row {
+      display: flex;
+      gap: 8px;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+    }
+    .rating-row:last-child { border-bottom: none; }
+    .rating-row .c1 { flex: 1; color: #111; }
+    .rating-row .c2 { flex: 2; color: #555; }
+    .rating-row .c3 { flex: 1.5; color: #888; font-size: 11px; text-align: right; }
+    .empty { color: #bbb; font-size: 14px; text-align: center; padding: 2rem 0; }
+
+    /* Thanks */
+    .thanks-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .thanks-wrap h1 { color: white; font-size: 2.5rem; font-weight: 600; }
+    .thanks-wrap p { color: rgba(255,255,255,0.75); font-size: 15px; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="page active" id="p-login">
+    <div class="card">
+      <div class="label-box"><span>nickname</span></div>
+      <input class="name-input" id="nicknameInput" type="text" placeholder="Enter your nickname..." />
+      <div class="btn-wrap">
+        <button class="circle-btn" id="enterBtn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"/>
+            <polyline points="5 12 12 5 19 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="page" id="p-home">
+    <div class="option-wrap">
+      <div class="row">
+        <button class="option-card" id="btn-check">check how busy</button>
+        <button class="option-card" id="btn-rate">rate how busy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECK: pick location -->
+  <div class="page" id="p-check">
+    <div class="option-wrap">
+      <div class="row">
+        <button class="option-card" id="btn-check-veale">veale</button>
+        <button class="option-card" id="btn-check-wyant">wyant</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RATINGS VIEW -->
+  <div class="page" id="p-ratings">
+    <div class="ratings-page">
+      <div class="ratings-title" id="ratings-title">recent ratings</div>
+      <div class="ratings-box">
+        <div class="col-headers">
+          <span class="c1">rating</span>
+          <span class="c2">additional note</span>
+          <span class="c3">date &amp; time (EST)</span>
+        </div>
+        <div id="ratings-list"><div class="empty">loading...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RATE: pick location -->
+  <div class="page" id="p-rate">
+    <div class="option-wrap">
+      <div class="row">
+        <button class="option-card" id="btn-rate-veale">veale</button>
+        <button class="option-card" id="btn-rate-wyant">wyant</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RATE VEALE FORM -->
+  <div class="page" id="p-rate-veale">
+    <div class="form-page">
+      <div class="form-group">
+        <div class="form-label">busy ratingness</div>
+        <input class="form-input" id="vealeRating" type="text" placeholder="e.g. 7/10" />
+      </div>
+      <div class="form-group">
+        <div class="form-label">additional comments</div>
+        <textarea class="form-input tall" id="vealeComments" placeholder="Any extra details..."></textarea>
+      </div>
+      <div class="submit-wrap">
+        <button class="circle-btn" id="vealeSubmit">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"/>
+            <polyline points="5 12 12 5 19 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RATE WYANT FORM -->
+  <div class="page" id="p-rate-wyant">
+    <div class="form-page">
+      <div class="form-group">
+        <div class="form-label">busy ratingness</div>
+        <input class="form-input" id="wyantRating" type="text" placeholder="e.g. 7/10" />
+      </div>
+      <div class="form-group">
+        <div class="form-label">additional comments</div>
+        <textarea class="form-input tall" id="wyantComments" placeholder="Any extra details..."></textarea>
+      </div>
+      <div class="submit-wrap">
+        <button class="circle-btn" id="wyantSubmit">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"/>
+            <polyline points="5 12 12 5 19 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THANKS -->
+  <div class="page" id="p-thanks">
+    <div class="thanks-wrap">
+      <h1>thanks!</h1>
+      <p>your rating has been submitted</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const app = initializeApp({
+      apiKey: "AIzaSyC4osCaDt5YIgQpyw6Dz93856-eHNC8zmw",
+      authDomain: "vealechecker123.firebaseapp.com",
+      projectId: "vealechecker123",
+      storageBucket: "vealechecker123.firebasestorage.app",
+      messagingSenderId: "914044498046",
+      appId: "1:914044498046:web:eba6404b2a87725b96a82f"
+    });
+    const db = getFirestore(app);
+
+    function goTo(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function setBtn(btn, active) {
+      btn.classList.toggle('active', active);
+      btn.querySelector('svg').setAttribute('stroke', active ? 'white' : '#ccc');
+    }
+
+    // Login
+    const nicknameInput = document.getElementById('nicknameInput');
+    const enterBtn = document.getElementById('enterBtn');
+    nicknameInput.addEventListener('input', () => setBtn(enterBtn, nicknameInput.value.trim().length > 0));
+    nicknameInput.addEventListener('keydown', e => { if (e.key === 'Enter') enterBtn.click(); });
+    enterBtn.addEventListener('click', () => {
+      if (!nicknameInput.value.trim()) { nicknameInput.classList.add('error'); return; }
+      nicknameInput.classList.remove('error');
+      goTo('p-home');
+    });
+
+    // Home
+    document.getElementById('btn-check').addEventListener('click', () => goTo('p-check'));
+    document.getElementById('btn-rate').addEventListener('click', () => goTo('p-rate'));
+
+    // Check locations
+    document.getElementById('btn-check-veale').addEventListener('click', () => goTo('p-ratings'));
+    document.getElementById('btn-check-wyant').addEventListener('click', () => loadRatings('wyant'));
+
+    // Rate locations
+    document.getElementById('btn-rate-veale').addEventListener('click', () => goTo('p-rate-veale'));
+    document.getElementById('btn-rate-wyant').addEventListener('click', () => goTo('p-rate-wyant'));
+
+    // Rate forms
+    const vealeRating = document.getElementById('vealeRating');
+    const vealeSubmit = document.getElementById('vealeSubmit');
+    vealeRating.addEventListener('input', () => setBtn(vealeSubmit, vealeRating.value.trim().length > 0));
+    vealeSubmit.addEventListener('click', () => submitRating('veale'));
+
+    const wyantRating = document.getElementById('wyantRating');
+    const wyantSubmit = document.getElementById('wyantSubmit');
+    wyantRating.addEventListener('input', () => setBtn(wyantSubmit, wyantRating.value.trim().length > 0));
+    wyantSubmit.addEventListener('click', () => submitRating('wyant'));
+
+    async function submitRating(loc) {
+      const ratingEl = document.getElementById(loc + 'Rating');
+      const commentsEl = document.getElementById(loc + 'Comments');
+      if (!ratingEl.value.trim()) return;
+      await addDoc(collection(db, loc + '_ratings'), {
+        rating: ratingEl.value.trim(),
+        comments: commentsEl.value.trim(),
+        timestamp: serverTimestamp()
+      });
+      ratingEl.value = '';
+      commentsEl.value = '';
+      goTo('p-thanks');
+    }
+
+    async function loadRatings(loc) {
+      goTo('p-ratings');
+      document.getElementById('ratings-title').textContent = 'recent ratings — ' + loc;
+      const list = document.getElementById('ratings-list');
+      list.innerHTML = '<div class="empty">loading...</div>';
+      try {
+        const q = query(collection(db, loc + '_ratings'));
+        const snap = await getDocs(q);
+        if (snap.empty) { list.innerHTML = '<div class="empty">no ratings yet</div>'; return; }
+        list.innerHTML = '';
+        snap.forEach(doc => {
+          const d = doc.data();
+          const ts = d.timestamp?.toDate();
+          const timeStr = ts ? ts.toLocaleString('en-US', {
+            timeZone: 'America/New_York',
+            month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          }) : '—';
+          const row = document.createElement('div');
+          row.className = 'rating-row';
+          row.innerHTML = `<span class="c1">${d.rating}</span><span class="c2">${d.comments || '—'}</span><span class="c3">${timeStr}</span>`;
+          list.appendChild(row);
+        });
+      } catch(e) {
+        list.innerHTML = '<div class="empty">error loading ratings</div>';
+      }
+    }
+  </script>
+</body>
+</html>
